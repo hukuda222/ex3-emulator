@@ -1,0 +1,13 @@
+LDA X
+BSA p2
+STA X
+ADD Y
+BSA p2
+BSA p2
+STA Y
+HLT
+p2,HEX 0
+compileCIL
+BUN p2 I
+X,DEC 10
+Y,DEC 200

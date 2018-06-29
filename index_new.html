@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>アセン鰤</title>
+    <script src="./new_buri.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.js"></script>
+    <style>
+    .boxContainer {
+	display: flex;
+	display: -moz-flex;
+	display: -o-flex;
+	display: -webkit-flex;
+	display: -ms-flex;
+	flex-direction: row;
+	-moz-flex-direction: row;
+	-o-flex-direction: row;
+	-webkit-flex-direction: row;
+	-ms-flex-direction: row;
+    }
+     </style>
+</head>
+<body>
+    <div class ="boxContainer">
+   <div id="input" style="height: 600px;width: 400px;font-size:18px;color:lightgreen"></div>
+    <textarea id="output" class ="box" readonly=true style="height: 594px;width: 350px;resize:none;background-color:#252525;font-size:18px;color:lightgreen"></textarea>
+    <table border="1" width="300" >
+       <tbody>
+         <tr>
+           <td>命令</td>
+           <td>引数</td>
+           <td>意味</td>
+         </tr>
+         <tr>
+           <td>CLA</td>
+           <td></td>
+           <td>ACをクリア</td>
+         </tr>
+         <tr>
+           <td>CLE</td>
+           <td></td>
+           <td>Eをクリア</td>
+         </tr>
+         <tr>
+           <td>CMA</td>
+           <td></td>
+           <td>ACをビット反転</td>
+         </tr>
+         <tr>
+           <td>CME</td>
+           <td></td>
+           <td>Eをビット反転</td>
+         </tr>
+         <tr>
+           <td>CIR</td>
+           <td></td>
+           <td>ACとEを右回転シフト</td>
+         </tr>
+         <tr>
+           <td>CUL</td>
+           <td></td>
+           <td>ACとEを左回転シフト</td>
+         </tr>
+         <tr>
+           <td>INC</td>
+           <td></td>
+           <td>ACをインクリメント</td>
+         </tr>
+         <tr>
+           <td>SPA</td>
+           <td></td>
+           <td>ACの最上位ビットが0なら命令を一個飛ばす</td>
+         </tr>
+         <tr>
+           <td>SNA</td>
+           <td></td>
+           <td>ACの最上位ビットが1なら命令を一個飛ばす</td>
+         </tr>
+         <tr>
+           <td>SZA</td>
+           <td></td>
+           <td>ACが0なら命令を一個飛ばす</td>
+         </tr>
+         <tr>
+           <td>SZE</td>
+           <td></td>
+           <td>Eが0なら命令を一個飛ばす</td>
+         </tr>
+         <tr>
+           <td>HLT</td>
+           <td></td>
+           <td>終了</td>
+         </tr>
+         <tr>
+           <td>DEC</td>
+           <td>10進数(int)</td>
+           <td>変数を定義する(変数名はラベル)</td>
+         </tr>
+         <tr>
+           <td>HEX</td>
+           <td>16進数(int)</td>
+           <td>変数を定義する(変数名はラベル)</td>
+         </tr>
+       </tbody>
+     </table>
+     <table border="1" width="300" >
+        <tbody>
+     <tr>
+       <td>AND</td>
+       <td>ラベル(string)</td>
+       <td>AC&(ラベルに記されたアドレスに記された値)</td>
+     </tr>
+     <tr>
+       <td>ADD</td>
+       <td>ラベル(string)</td>
+       <td>AC+(ラベルに記されたアドレスに記された値)、溢れた場合はEに保存</td>
+     </tr>
+     <tr>
+       <td>LDA</td>
+       <td>ラベル(string)</td>
+       <td>AC=(ラベルに記されたアドレスに記された値)</td>
+     </tr>
+     <tr>
+       <td>BUN</td>
+       <td>ラベル(string)</td>
+       <td>ラベルに記されたアドレスに飛ぶ</td>
+     </tr>
+     <tr>
+       <td>BUN</td>
+       <td>ラベル(string)</td>
+       <td>(ラベルに記されたアドレス+1)に飛ぶ</td>
+     </tr>
+     <tr>
+       <td>ISZ</td>
+       <td>ラベル(string)</td>
+       <td>(ラベルに記されたアドレスに記された値)を+1し、それが0なら命令を一つ飛ばす</td>
+     </tr>
+     <tr>
+       <td>STA</td>
+       <td>ラベル(string)</td>
+       <td>(ラベルに記されたアドレス)にACの値を代入</td>
+     </tr>
+     <tr>
+       <td>BSA</td>
+       <td>ラベル(string)</td>
+       <td>(ラベルに記されたアドレス)に現在のアドレスの値を代入</td>
+     </tr>
+ </tbody>
+</table>
+</div>
+    <input type="button" id="compile" value="コンパイル" onclick="compile()">
+    <script>
+    const input_editor = ace.edit("input");
+    input_editor.setTheme("ace/theme/monokai");
+    input_editor.$blockScrolling = Infinity;
+    const compile = () =>{
+        const b = new Buri();
+        try {
+            b.read(input_editor.getValue());
+        } catch (e) {
+            document.querySelector("#output").value = e;
+        }
+        if(b.ERR==="")b.exe();
+        const loop = _ =>{
+            console.log(b.END,b.ERR);
+            if(b.END){
+                document.querySelector("#output").value = "ok";
+            }else if(b.ERR!==""){
+                document.querySelector("#output").value = b.ERR;
+            }else{
+                setTimeout(loop,1/100);
+            }
+        };
+        loop();
+   };
+   </script>
+
+</body>
+</html>
